@@ -8,8 +8,8 @@ This project is a straightforward demonstration of a tile-based RTS game develop
 
 ## How to Run
 
-1. **Compile the Code:** Ensure all the `.java` files (or the single file if kept together) are compiled.
-2. **Run the Game:** Execute the `RTSGame` class to launch the game window.
+1. **Compile the Code:** Ensure all the `.java` files are compiled.
+2. **Run the Game:** Execute the `MainMenu` class and start the game from there. The settings dialog allows choosing between 1000x700 and 1920x1080 resolutions.
 
 ## Gameplay Instructions
 
