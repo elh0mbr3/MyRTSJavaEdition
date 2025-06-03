@@ -2,6 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.Point;       // For working with Point
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
@@ -96,6 +100,10 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
 
     private Timer timer;
 
+    // Textures for map tiles
+    private BufferedImage grassTexture;
+    private BufferedImage waterTexture;
+
     // Variables for drag-selection
     private Rectangle selectionRect;
     private boolean isSelecting = false;
@@ -111,6 +119,13 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
         units.add(new Unit(100, 100));
         units.add(new Unit(200, 150));
         buildingManager = new BuildingManager();
+
+        try {
+            grassTexture = ImageIO.read(new File("src/texture/grass_texture.png"));
+            waterTexture = ImageIO.read(new File("src/texture/water_texture.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -157,8 +172,13 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
         for(int row = 0; row < MAP_HEIGHT; row++) {
             for(int col = 0; col < MAP_WIDTH; col++) {
                 Tile tile = gameMap.getTile(col, row);
-                g.setColor(tile == Tile.GRASS ? Color.GREEN : Color.BLUE);
-                g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                BufferedImage img = tile == Tile.GRASS ? grassTexture : waterTexture;
+                if (img != null) {
+                    g.drawImage(img, col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE, null);
+                } else {
+                    g.setColor(tile == Tile.GRASS ? Color.GREEN : Color.BLUE);
+                    g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
                 g.setColor(Color.BLACK);
                 g.drawRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
