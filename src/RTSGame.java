@@ -92,7 +92,7 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
 
     private GameMap gameMap;
     private List<Unit> units;           // Unit class is defined in Unit.java
-    private BuildingManager buildingManager;  // Defined in BuildingMechanic.java
+    private BuildingManager buildingManager;  // Defined in BuildingManager.java
 
     private Timer timer;
 
@@ -237,16 +237,48 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
             int by = e.getY();
             int tileX = bx / TILE_SIZE;
             int tileY = by / TILE_SIZE;
-            if(tileX >= 0 && tileX < gameMap.getWidth() && tileY >= 0 && tileY < gameMap.getHeight()) {
-                if(gameMap.getTile(tileX, tileY) == Tile.GRASS) {
+            int tilesWide = 64 / TILE_SIZE; // building size in tiles
+            int tilesHigh = 64 / TILE_SIZE;
+
+            boolean inBounds = tileX >= 0 && tileY >= 0 &&
+                    tileX + tilesWide <= gameMap.getWidth() &&
+                    tileY + tilesHigh <= gameMap.getHeight();
+
+            if(inBounds) {
+                boolean allGrass = true;
+                for(int ty = tileY; ty < tileY + tilesHigh && allGrass; ty++) {
+                    for(int tx = tileX; tx < tileX + tilesWide; tx++) {
+                        if(gameMap.getTile(tx, ty) != Tile.GRASS) {
+                            allGrass = false;
+                            break;
+                        }
+                    }
+                }
+
+                Rectangle newBuildingArea = new Rectangle(tileX * TILE_SIZE, tileY * TILE_SIZE, 64, 64);
+                boolean spaceFree = true;
+                for(Building b : buildingManager.getBuildings()) {
+                    Rectangle r = new Rectangle(b.getX(), b.getY(), b.getWidth(), b.getHeight());
+                    if(r.intersects(newBuildingArea)) {
+                        spaceFree = false;
+                        break;
+                    }
+                }
+
+                if(allGrass && spaceFree) {
                     buildingManager.addBuilding(
                             new Building(tileX * TILE_SIZE, tileY * TILE_SIZE, 64, 64, "Building")
                     );
                     resourceBar.updateGold(-20);
-                } else {
+                } else if(!allGrass) {
                     JOptionPane.showMessageDialog(this, "Cannot build on water!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cannot build on top of another building!");
                 }
+            } else {
+                JOptionPane.showMessageDialog(this, "Not enough space to build here.");
             }
+
             buildMode = false;
             return;
         }
@@ -477,6 +509,6 @@ enum Tile {
  * Note:
  * - The Unit class is defined in a separate file (Unit.java) and includes the stat getters:
  *      getAttack(), getDefense(), getIntellect(), getHP()
- * - The BuildingManager and Building classes are defined in BuildingMechanic.java.
+ * - The BuildingManager and Building classes are defined in BuildingManager.java.
  * - The Pathfinder class is defined in Pathfinder.java.
  */
