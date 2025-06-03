@@ -123,6 +123,8 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
 
     private ResourceBar resourceBar;
     private boolean buildMode = false; // Flag for build mode
+    private BuildingType buildType = BuildingType.BARRACKS;
+    private int buildCost = 20;
 
     public GamePanel(ResourceBar resourceBar) {
         this.resourceBar = resourceBar;
@@ -154,9 +156,31 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
             ));
         });
 
-        // Build button toggles build mode
+        // Build button toggles build mode and lets the user choose a type
         resourceBar.getBuildButton().addActionListener(e -> {
-            if(resourceBar.getGold() >= 20) {
+            String[] opts = {"Barracks - 20g", "Resource Depot - 10g", "Tower - 15g"};
+            int choice = JOptionPane.showOptionDialog(this,
+                    "Select building to construct",
+                    "Build",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null, opts, opts[0]);
+            if(choice == -1) return;
+            switch(choice) {
+                case 0:
+                    buildType = BuildingType.BARRACKS;
+                    buildCost = 20;
+                    break;
+                case 1:
+                    buildType = BuildingType.DEPOT;
+                    buildCost = 10;
+                    break;
+                case 2:
+                    buildType = BuildingType.TOWER;
+                    buildCost = 15;
+                    break;
+            }
+            if(resourceBar.getGold() >= buildCost) {
                 buildMode = true;
                 JOptionPane.showMessageDialog(this,
                         "Build mode activated. Click on the map to place a building.");
@@ -235,6 +259,8 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
         for(Unit unit : units) {
             unit.update(gameMap);
         }
+        // Update buildings (handle unit production)
+        buildingManager.updateBuildings(units);
         // Simple collision resolution between units
         for(int i = 0; i < units.size(); i++) {
             for(int j = i+1; j < units.size(); j++) {
@@ -299,14 +325,14 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
 
                 if(allGrass && spaceFree) {
                     buildingManager.addBuilding(
-                            new Building(tileX * TILE_SIZE, tileY * TILE_SIZE, 64, 64, "Building")
+                            new Building(tileX * TILE_SIZE, tileY * TILE_SIZE, 64, 64, buildType)
                     );
                     for(int ty = tileY; ty < tileY + tilesHigh; ty++) {
                         for(int tx = tileX; tx < tileX + tilesWide; tx++) {
                             gameMap.setTile(tx, ty, Tile.BUILDING);
                         }
                     }
-                    resourceBar.updateGold(-20);
+                    resourceBar.updateGold(-buildCost);
                 } else if(!allGrass) {
                     JOptionPane.showMessageDialog(this, "Cannot build on water!");
                 } else {
@@ -372,6 +398,16 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
     @Override
     public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)) {
+            Building b = buildingManager.getBuildingAt(e.getPoint());
+            if(b != null && b.getType() == BuildingType.BARRACKS) {
+                if(resourceBar.getGold() >= 10) {
+                    b.queueUnit();
+                    resourceBar.updateGold(-10);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Not enough gold to train unit.");
+                }
+                return;
+            }
             for(Unit unit : units) {
                 if(unit.isSelected()) {
                     unit.setTarget(e.getX(), e.getY(), gameMap);
