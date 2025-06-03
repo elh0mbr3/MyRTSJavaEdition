@@ -147,13 +147,20 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
         timer = new Timer(16, this);
         timer.start();
 
-        // Spawn button action (for testing; later you may remove this)
+        // Spawn button action - only place new units on grass tiles
         resourceBar.getSpawnButton().addActionListener(e -> {
+            if (resourceBar.getGold() < 10) {
+                return;
+            }
+            Random rand = new Random();
+            int tx, ty;
+            do {
+                tx = rand.nextInt(gameMap.getWidth());
+                ty = rand.nextInt(gameMap.getHeight());
+            } while (gameMap.getTile(tx, ty) != Tile.GRASS);
             resourceBar.updateGold(-10);
-            units.add(new Unit(
-                    (int)(Math.random() * getWidth()),
-                    (int)(Math.random() * getHeight())
-            ));
+            units.add(new Unit(tx * TILE_SIZE + TILE_SIZE / 2,
+                               ty * TILE_SIZE + TILE_SIZE / 2));
         });
 
         // Build button toggles build mode and lets the user choose a type
@@ -268,7 +275,7 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
             unit.update(gameMap);
         }
         // Update buildings (handle unit production)
-        buildingManager.updateBuildings(units);
+        buildingManager.updateBuildings(units, gameMap);
         // Simple collision resolution between units
         for(int i = 0; i < units.size(); i++) {
             for(int j = i+1; j < units.size(); j++) {

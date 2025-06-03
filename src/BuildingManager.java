@@ -56,10 +56,11 @@ public class BuildingManager {
 
     /**
      * Updates all buildings and spawns units if training is complete.
+     * @param map   The game map for checking valid spawn locations.
      */
-    public void updateBuildings(List<Unit> units) {
-        for(Building b : buildings) {
-            b.update(units);
+    public void updateBuildings(List<Unit> units, GameMap map) {
+        for (Building b : buildings) {
+            b.update(units, map);
         }
     }
 }
@@ -120,15 +121,41 @@ class Building {
         }
     }
 
-    public void update(List<Unit> units) {
-        if(type == BuildingType.BARRACKS && queue > 0) {
+    public void update(List<Unit> units, GameMap map) {
+        if (type == BuildingType.BARRACKS && queue > 0) {
             buildTimer++;
-            if(buildTimer >= TRAIN_TIME) {
+            if (buildTimer >= TRAIN_TIME) {
                 buildTimer = 0;
                 queue--;
-                units.add(new Unit(x + width/2, y + height/2));
+                Point spawn = findSpawnPoint(map);
+                units.add(new Unit(spawn.x, spawn.y));
             }
         }
+    }
+
+    /**
+     * Finds a valid spawn location adjacent to this building. If no grass tile
+     * is available, the unit is spawned at the building centre as a fallback.
+     */
+    private Point findSpawnPoint(GameMap map) {
+        int baseTileX = x / GamePanel.TILE_SIZE;
+        int baseTileY = y / GamePanel.TILE_SIZE;
+        int tilesWide = width / GamePanel.TILE_SIZE;
+        int tilesHigh = height / GamePanel.TILE_SIZE;
+        int centerX = baseTileX + tilesWide / 2;
+        int centerY = baseTileY + tilesHigh / 2;
+        int[][] dirs = { {1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {-1,1}, {1,-1}, {-1,-1} };
+        for (int[] d : dirs) {
+            int tx = centerX + d[0];
+            int ty = centerY + d[1];
+            if (tx >= 0 && ty >= 0 && tx < map.getWidth() && ty < map.getHeight()) {
+                if (map.getTile(tx, ty) == Tile.GRASS) {
+                    return new Point(tx * GamePanel.TILE_SIZE + GamePanel.TILE_SIZE/2,
+                                     ty * GamePanel.TILE_SIZE + GamePanel.TILE_SIZE/2);
+                }
+            }
+        }
+        return new Point(x + width / 2, y + height / 2);
     }
 
     // Optional getters for building properties
