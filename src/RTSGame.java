@@ -407,6 +407,11 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
 
             buildMode = false;
             return;
+        } else if(buildMode && SwingUtilities.isRightMouseButton(e)) {
+            // allow the user to cancel building placement with right click
+            buildMode = false;
+            repaint();
+            return;
         }
         if(SwingUtilities.isLeftMouseButton(e)) {
             isSelecting = true;
