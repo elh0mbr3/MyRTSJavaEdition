@@ -5,11 +5,13 @@ This project is a straightforward demonstration of a tile-based RTS game develop
 - **Randomly Generated Map:** A grid-based map with grass and water tiles.
 - **Basic Resource System:** A simple control panel showing your current gold.
 - **Unit Management:** Units that can be spawned, selected by dragging a selection box, and moved via right-click commands.
+- **Map Editor:** Launch a simple editor from the main menu to paint tiles.
 
 ## How to Run
 
 1. **Compile the Code:** Ensure all the `.java` files are compiled.
 2. **Run the Game:** Execute the `MainMenu` class and start the game from there. The settings dialog allows choosing between 1000x700 and 1920x1080 resolutions.
+3. **Edit Maps:** From the main menu choose "Map Editor" to open a small tile editor.
 
 ## Gameplay Instructions
 

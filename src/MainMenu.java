@@ -24,11 +24,13 @@ public class MainMenu extends JFrame {
         title.setForeground(Color.WHITE);
 
         JButton startButton = new JButton("Start Game");
+        JButton editorButton = new JButton("Map Editor");
         JButton settingsButton = new JButton("Settings");
         JButton exitButton = new JButton("Exit");
 
         Font btnFont = startButton.getFont().deriveFont(Font.PLAIN, 16f);
         startButton.setFont(btnFont);
+        editorButton.setFont(btnFont);
         settingsButton.setFont(btnFont);
         exitButton.setFont(btnFont);
 
@@ -43,12 +45,16 @@ public class MainMenu extends JFrame {
         gbc.gridy = 1;
         add(startButton, gbc);
 
-        // Add Settings button
+        // Add Map Editor button
         gbc.gridy = 2;
+        add(editorButton, gbc);
+
+        // Add Settings button
+        gbc.gridy = 3;
         add(settingsButton, gbc);
 
         // Add Exit button
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         add(exitButton, gbc);
 
         // Action listener for "Start Game"
@@ -58,6 +64,14 @@ public class MainMenu extends JFrame {
                 game.setVisible(true);
             });
             dispose();
+        });
+
+        // Action listener for "Map Editor"
+        editorButton.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                MapEditor editor = new MapEditor();
+                editor.setVisible(true);
+            });
         });
 
         // Action listener for "Settings"
