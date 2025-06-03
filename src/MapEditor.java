@@ -27,6 +27,8 @@ public class MapEditor extends JFrame {
 
         panel = new EditorPanel();
         add(panel);
+        // ensure the frame fits the editing panel so the entire map is visible
+        pack();
     }
 
     private class EditorPanel extends JPanel implements MouseListener {
