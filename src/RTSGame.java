@@ -208,11 +208,19 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
         for(int row = 0; row < MAP_HEIGHT; row++) {
             for(int col = 0; col < MAP_WIDTH; col++) {
                 Tile tile = gameMap.getTile(col, row);
-                BufferedImage img = tile == Tile.GRASS ? grassTexture : waterTexture;
+                BufferedImage img = null;
+                if(tile == Tile.GRASS || tile == Tile.BUILDING) {
+                    img = grassTexture;
+                } else if(tile == Tile.WATER) {
+                    img = waterTexture;
+                }
                 if (img != null) {
                     g.drawImage(img, col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE, null);
+                } else if (tile == Tile.BRIDGE) {
+                    g.setColor(new Color(139, 69, 19));
+                    g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 } else {
-                    g.setColor(tile == Tile.GRASS ? Color.GREEN : Color.BLUE);
+                    g.setColor(Color.BLUE);
                     g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 }
                 g.setColor(Color.BLACK);
@@ -473,7 +481,13 @@ class MiniMapPanel extends JPanel {
         for(int row = 0; row < mapHeight; row++) {
             for(int col = 0; col < mapWidth; col++) {
                 Tile tile = map.getTile(col, row);
-                g.setColor(tile == Tile.GRASS ? Color.GREEN : Color.BLUE);
+                if(tile == Tile.GRASS || tile == Tile.BUILDING) {
+                    g.setColor(Color.GREEN);
+                } else if(tile == Tile.WATER) {
+                    g.setColor(Color.BLUE);
+                } else { // bridge
+                    g.setColor(new Color(139,69,19));
+                }
                 g.fillRect(col * miniTileSize, row * miniTileSize, miniTileSize, miniTileSize);
             }
         }
@@ -554,11 +568,83 @@ class GameMap {
 
     public GameMap(int width, int height) {
         tiles = new Tile[height][width];
-        Random rand = new Random();
         for(int row = 0; row < height; row++) {
             for(int col = 0; col < width; col++) {
-                tiles[row][col] = (rand.nextDouble() < 0.2) ? Tile.WATER : Tile.GRASS;
+                tiles[row][col] = Tile.GRASS;
             }
+        }
+        generateSeashore();
+        generateLakes();
+        generateRiverWithBridges();
+    }
+
+    private void generateSeashore() {
+        int w = getWidth();
+        int h = getHeight();
+        for(int x = 0; x < w; x++) {
+            tiles[0][x] = Tile.WATER;
+            tiles[h-1][x] = Tile.WATER;
+        }
+        for(int y = 0; y < h; y++) {
+            tiles[y][0] = Tile.WATER;
+            tiles[y][w-1] = Tile.WATER;
+        }
+    }
+
+    private void generateLakes() {
+        Random rand = new Random();
+        int lakeCount = 2 + rand.nextInt(2); // 2-3 lakes
+        int w = getWidth();
+        int h = getHeight();
+        for(int i = 0; i < lakeCount; i++) {
+            int cx = 2 + rand.nextInt(w - 4);
+            int cy = 2 + rand.nextInt(h - 4);
+            int radius = 2 + rand.nextInt(2);
+            for(int y = -radius; y <= radius; y++) {
+                for(int x = -radius; x <= radius; x++) {
+                    int dx = cx + x;
+                    int dy = cy + y;
+                    if(dx >= 1 && dy >= 1 && dx < w-1 && dy < h-1) {
+                        if(x*x + y*y <= radius*radius) {
+                            tiles[dy][dx] = Tile.WATER;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateRiverWithBridges() {
+        Random rand = new Random();
+        boolean vertical = rand.nextBoolean();
+        java.util.List<Point> riverPoints = new ArrayList<>();
+        int w = getWidth();
+        int h = getHeight();
+        if(vertical) {
+            int x = 2 + rand.nextInt(w - 4);
+            for(int y = 0; y < h; y++) {
+                tiles[y][x] = Tile.WATER;
+                riverPoints.add(new Point(x, y));
+                if(rand.nextDouble() < 0.4) {
+                    x += rand.nextBoolean() ? 1 : -1;
+                    x = Math.max(1, Math.min(w-2, x));
+                }
+            }
+        } else {
+            int y = 2 + rand.nextInt(h - 4);
+            for(int x = 0; x < w; x++) {
+                tiles[y][x] = Tile.WATER;
+                riverPoints.add(new Point(x, y));
+                if(rand.nextDouble() < 0.4) {
+                    y += rand.nextBoolean() ? 1 : -1;
+                    y = Math.max(1, Math.min(h-2, y));
+                }
+            }
+        }
+        int bridges = 1 + rand.nextInt(2);
+        for(int i = 0; i < bridges && !riverPoints.isEmpty(); i++) {
+            Point p = riverPoints.get(rand.nextInt(riverPoints.size()));
+            tiles[p.y][p.x] = Tile.BRIDGE;
         }
     }
 
@@ -580,6 +666,7 @@ class GameMap {
 enum Tile {
     GRASS,
     WATER,
+    BRIDGE,
     BUILDING
 }
 
