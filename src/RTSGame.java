@@ -22,20 +22,32 @@ public class RTSGame extends JFrame {
     private GamePanel gamePanel;          // Center game area
     private BottomPanel bottomPanel;      // Bottom panel with mini-map and unit commands
 
-    public RTSGame() {
+    /**
+     * Creates the game window with the given resolution.
+     * @param width  desired frame width
+     * @param height desired frame height
+     */
+    public RTSGame(int width, int height) {
         setTitle("RTS with Warcraft II–style UI");
-        setSize(1000, 700);
+        setSize(width, height);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         resourceBar = new ResourceBar();
         gamePanel = new GamePanel(resourceBar);
-        bottomPanel = new BottomPanel(gamePanel, resourceBar);
+        bottomPanel = new BottomPanel(gamePanel, resourceBar, width);
 
         setLayout(new BorderLayout());
         add(resourceBar, BorderLayout.NORTH);
         add(gamePanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Default constructor uses the classic 1000x700 window.
+     */
+    public RTSGame() {
+        this(1000, 700);
     }
 
     public static void main(String[] args) {
@@ -392,14 +404,14 @@ class BottomPanel extends JPanel {
     private MiniMapPanel miniMap;
     private UnitCommandsPanel commandsPanel;
 
-    public BottomPanel(GamePanel gamePanel, ResourceBar resourceBar) {
+    public BottomPanel(GamePanel gamePanel, ResourceBar resourceBar, int width) {
         setLayout(new BorderLayout());
         miniMap = new MiniMapPanel(gamePanel);
-        commandsPanel = new UnitCommandsPanel(gamePanel, resourceBar);
+        commandsPanel = new UnitCommandsPanel(gamePanel, resourceBar, width - 200);
         add(miniMap, BorderLayout.WEST);
         add(commandsPanel, BorderLayout.CENTER);
         setBackground(new Color(60,60,60));
-        setPreferredSize(new Dimension(1000,150));
+        setPreferredSize(new Dimension(width,150));
     }
 }
 
@@ -442,10 +454,10 @@ class UnitCommandsPanel extends JPanel {
     private JButton attackButton, stopButton, patrolButton;
     private JLabel attackLabel, defenseLabel, intellectLabel, hpLabel;
 
-    public UnitCommandsPanel(GamePanel gamePanel, ResourceBar resourceBar) {
+    public UnitCommandsPanel(GamePanel gamePanel, ResourceBar resourceBar, int width) {
         this.gamePanel = gamePanel;
         this.resourceBar = resourceBar;
-        setPreferredSize(new Dimension(800,150));
+        setPreferredSize(new Dimension(width,150));
         setLayout(new FlowLayout(FlowLayout.LEFT,20,20));
         setBackground(new Color(50,50,50));
 
