@@ -221,7 +221,7 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
     public void actionPerformed(ActionEvent e) {
         // Update all units
         for(Unit unit : units) {
-            unit.update();
+            unit.update(gameMap);
         }
         // Simple collision resolution between units
         for(int i = 0; i < units.size(); i++) {
@@ -289,6 +289,11 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
                     buildingManager.addBuilding(
                             new Building(tileX * TILE_SIZE, tileY * TILE_SIZE, 64, 64, "Building")
                     );
+                    for(int ty = tileY; ty < tileY + tilesHigh; ty++) {
+                        for(int tx = tileX; tx < tileX + tilesWide; tx++) {
+                            gameMap.setTile(tx, ty, Tile.BUILDING);
+                        }
+                    }
                     resourceBar.updateGold(-20);
                 } else if(!allGrass) {
                     JOptionPane.showMessageDialog(this, "Cannot build on water!");
@@ -513,6 +518,10 @@ class GameMap {
         return tiles[y][x];
     }
 
+    public void setTile(int x, int y, Tile tile) {
+        tiles[y][x] = tile;
+    }
+
     public int getWidth() { return tiles[0].length; }
     public int getHeight() { return tiles.length; }
 }
@@ -522,7 +531,8 @@ class GameMap {
  */
 enum Tile {
     GRASS,
-    WATER
+    WATER,
+    BUILDING
 }
 
 /**

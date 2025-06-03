@@ -12,6 +12,8 @@ public class Unit {
     private boolean selected;
     private int size = 20;
     private List<Point> path = new ArrayList<>();
+    private int targetTileX = -1, targetTileY = -1;
+    private int prevX, prevY, stuckCounter;
 
     // Placeholder stat fields
     private int attack = 10;
@@ -27,6 +29,8 @@ public class Unit {
     public Unit(int x, int y) {
         this.x = x;
         this.y = y;
+        this.prevX = x;
+        this.prevY = y;
     }
 
     /**
@@ -43,6 +47,8 @@ public class Unit {
         int goalTileY = ty / GamePanel.TILE_SIZE;
         goalTileX = Math.max(0, Math.min(goalTileX, map.getWidth() - 1));
         goalTileY = Math.max(0, Math.min(goalTileY, map.getHeight() - 1));
+        this.targetTileX = goalTileX;
+        this.targetTileY = goalTileY;
         List<Point> newPath = Pathfinder.findPath(map, new Point(startTileX, startTileY), new Point(goalTileX, goalTileY));
         if (!newPath.isEmpty() && newPath.get(0).equals(new Point(startTileX, startTileY))) {
             newPath.remove(0);
@@ -54,7 +60,9 @@ public class Unit {
      * Updates the unit's position along the computed path.
      * The unit moves toward the centre of the next tile in the path.
      */
-    public void update() {
+    public void update(GameMap map) {
+        prevX = x;
+        prevY = y;
         if (!path.isEmpty()) {
             Point nextTile = path.get(0);
             int nextX = nextTile.x * GamePanel.TILE_SIZE + GamePanel.TILE_SIZE / 2;
@@ -75,6 +83,26 @@ public class Unit {
                 path.remove(0);
             }
         }
+        if (x == prevX && y == prevY && !path.isEmpty()) {
+            stuckCounter++;
+            if (stuckCounter > 15) {
+                recalcPath(map);
+                stuckCounter = 0;
+            }
+        } else {
+            stuckCounter = 0;
+        }
+    }
+
+    private void recalcPath(GameMap map) {
+        if (targetTileX < 0 || targetTileY < 0) return;
+        int startTileX = x / GamePanel.TILE_SIZE;
+        int startTileY = y / GamePanel.TILE_SIZE;
+        List<Point> newPath = Pathfinder.findPath(map, new Point(startTileX, startTileY), new Point(targetTileX, targetTileY));
+        if (!newPath.isEmpty() && newPath.get(0).equals(new Point(startTileX, startTileY))) {
+            newPath.remove(0);
+        }
+        path = newPath;
     }
 
     /**
