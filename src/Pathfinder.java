@@ -51,7 +51,7 @@ public class Pathfinder {
                 int nx = current.x + d[0];
                 int ny = current.y + d[1];
                 if (nx < 0 || ny < 0 || nx >= map.getWidth() || ny >= map.getHeight()) continue;
-                if (map.getTile(nx, ny) == Tile.WATER) continue;
+                if (map.getTile(nx, ny) != Tile.GRASS) continue;
                 if (closed[ny][nx]) continue;
                 int gNew = current.g + 1;
                 int hNew = manhattan(new Point(nx, ny), goal);
