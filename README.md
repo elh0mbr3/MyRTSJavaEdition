@@ -16,5 +16,6 @@ This project is a straightforward demonstration of a tile-based RTS game develop
 - **Unit Selection:** Drag with the left mouse button to select units.
 - **Unit Movement:** Right-click to command selected units to move to the desired location.
 - **Spawn Units:** Click the "Spawn Unit" button on the control panel to add a new unit, which will deduct some gold from your resources.
+- **Construct Buildings:** Use the "Build" button to place Barracks, Resource Depots, or Towers on open grass tiles. Right-click a Barracks to queue new units.
 
 This project serves as a basic foundation for more advanced RTS mechanics and gameplay features.
