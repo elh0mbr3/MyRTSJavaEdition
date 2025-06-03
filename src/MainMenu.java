@@ -9,6 +9,7 @@ import java.awt.event.*;
 public class MainMenu extends JFrame {
 
     private Dimension resolution = new Dimension(1000, 700);
+    private boolean fullscreen = false;
 
     public MainMenu() {
         setTitle("Main Menu");
@@ -53,7 +54,7 @@ public class MainMenu extends JFrame {
         // Action listener for "Start Game"
         startButton.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {
-                RTSGame game = new RTSGame(resolution.width, resolution.height);
+                RTSGame game = new RTSGame(resolution.width, resolution.height, fullscreen);
                 game.setVisible(true);
             });
             dispose();
@@ -67,12 +68,13 @@ public class MainMenu extends JFrame {
     }
 
     private void openSettings() {
-        SettingsDialog dialog = new SettingsDialog(this, resolution);
+        SettingsDialog dialog = new SettingsDialog(this, resolution, fullscreen);
         dialog.setVisible(true);
         Dimension sel = dialog.getSelectedResolution();
         if(sel != null) {
             resolution = sel;
         }
+        fullscreen = dialog.isFullscreen();
     }
 
     public static void main(String[] args) {
@@ -88,9 +90,11 @@ public class MainMenu extends JFrame {
  */
 class SettingsDialog extends JDialog {
     private JComboBox<String> resCombo;
+    private JCheckBox fullCheck;
     private Dimension result;
+    private boolean fullscreen;
 
-    public SettingsDialog(JFrame parent, Dimension current) {
+    public SettingsDialog(JFrame parent, Dimension current, boolean initialFullscreen) {
         super(parent, "Settings", true);
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -107,10 +111,15 @@ class SettingsDialog extends JDialog {
         }
         add(resCombo, gbc);
 
-        JButton ok = new JButton("OK");
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
+        fullCheck = new JCheckBox("Fullscreen");
+        fullCheck.setSelected(initialFullscreen);
+        add(fullCheck, gbc);
+
+        JButton ok = new JButton("OK");
+        gbc.gridy = 2;
         add(ok, gbc);
 
         ok.addActionListener(e -> {
@@ -120,6 +129,7 @@ class SettingsDialog extends JDialog {
             } else {
                 result = new Dimension(1000,700);
             }
+            this.fullscreen = fullCheck.isSelected();
             setVisible(false);
         });
 
@@ -127,7 +137,6 @@ class SettingsDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
-    public Dimension getSelectedResolution() {
-        return result;
-    }
+    public Dimension getSelectedResolution() { return result; }
+    public boolean isFullscreen() { return fullscreen; }
 }
