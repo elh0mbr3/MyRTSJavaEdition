@@ -21,6 +21,7 @@ public class RTSGame extends JFrame {
     private ResourceBar resourceBar;      // Top resource panel
     private GamePanel gamePanel;          // Center game area
     private BottomPanel bottomPanel;      // Bottom panel with mini-map and unit commands
+    private JPopupMenu contextMenu;       // In‑game context menu
 
     /**
      * Creates the game window with the given resolution.
@@ -47,6 +48,9 @@ public class RTSGame extends JFrame {
         add(resourceBar, BorderLayout.NORTH);
         add(gamePanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+
+        initContextMenu();
+        setupKeyBindings();
     }
 
     /**
@@ -54,6 +58,35 @@ public class RTSGame extends JFrame {
      */
     public RTSGame() {
         this(1000, 700, false);
+    }
+
+    private void initContextMenu() {
+        contextMenu = new JPopupMenu();
+        JMenuItem resume = new JMenuItem("Resume");
+        JMenuItem exit = new JMenuItem("Exit to Main Menu");
+        contextMenu.add(resume);
+        contextMenu.add(exit);
+        resume.addActionListener(e -> contextMenu.setVisible(false));
+        exit.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                MainMenu menu = new MainMenu();
+                menu.setVisible(true);
+            });
+            dispose();
+        });
+    }
+
+    private void setupKeyBindings() {
+        JRootPane root = getRootPane();
+        InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = root.getActionMap();
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "showMenu");
+        am.put("showMenu", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                contextMenu.show(root, getWidth()/2 - 60, getHeight()/2 - 30);
+            }
+        });
     }
 
     public static void main(String[] args) {
