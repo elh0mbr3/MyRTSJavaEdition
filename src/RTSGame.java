@@ -27,15 +27,21 @@ public class RTSGame extends JFrame {
      * @param width  desired frame width
      * @param height desired frame height
      */
-    public RTSGame(int width, int height) {
+    public RTSGame(int width, int height, boolean fullscreen) {
         setTitle("RTS with Warcraft II–style UI");
-        setSize(width, height);
+        if(fullscreen) {
+            setUndecorated(true);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+        } else {
+            setSize(width, height);
+            setLocationRelativeTo(null);
+        }
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
 
         resourceBar = new ResourceBar();
         gamePanel = new GamePanel(resourceBar);
-        bottomPanel = new BottomPanel(gamePanel, resourceBar, width);
+        int panelWidth = fullscreen ? Toolkit.getDefaultToolkit().getScreenSize().width : width;
+        bottomPanel = new BottomPanel(gamePanel, resourceBar, panelWidth);
 
         setLayout(new BorderLayout());
         add(resourceBar, BorderLayout.NORTH);
@@ -47,7 +53,7 @@ public class RTSGame extends JFrame {
      * Default constructor uses the classic 1000x700 window.
      */
     public RTSGame() {
-        this(1000, 700);
+        this(1000, 700, false);
     }
 
     public static void main(String[] args) {
@@ -74,6 +80,14 @@ class ResourceBar extends JPanel {
         oilLabel  = new JLabel("Oil: " + oil);
         spawnButton = new JButton("Spawn Unit");
         buildButton = new JButton("Build");
+
+        Font f = goldLabel.getFont().deriveFont(Font.BOLD, 14f);
+        goldLabel.setFont(f);
+        woodLabel.setFont(f);
+        oilLabel.setFont(f);
+        Font b = spawnButton.getFont().deriveFont(Font.PLAIN, 14f);
+        spawnButton.setFont(b);
+        buildButton.setFont(b);
 
         add(goldLabel);
         add(woodLabel);
@@ -103,8 +117,8 @@ class ResourceBar extends JPanel {
  */
 class GamePanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
     public static final int TILE_SIZE = 32;
-    private static final int MAP_WIDTH = 25;
-    private static final int MAP_HEIGHT = 15;
+    private static final int MAP_WIDTH = 40;
+    private static final int MAP_HEIGHT = 25;
 
     private GameMap gameMap;
     private List<Unit> units;           // Unit class is defined in Unit.java
@@ -287,8 +301,9 @@ class GamePanel extends JPanel implements MouseListener, MouseMotionListener, Ac
                 double minDist = u1.getSize();
                 if(dist < minDist) {
                     if(dist == 0) {
-                        u1.moveBy(1,0);
-                        u2.moveBy(-1,0);
+                        int dir = (i + j) % 2 == 0 ? 1 : -1;
+                        u1.moveBy(dir,0);
+                        u2.moveBy(-dir,0);
                     } else {
                         double overlap = (minDist - dist)/2.0;
                         double ox = (dx/dist)*overlap;
@@ -527,6 +542,16 @@ class UnitCommandsPanel extends JPanel {
         intellectLabel = new JLabel("Intellect: -");
         hpLabel = new JLabel("HP: -");
 
+        Font labelFont = attackLabel.getFont().deriveFont(Font.BOLD, 13f);
+        attackLabel.setFont(labelFont);
+        defenseLabel.setFont(labelFont);
+        intellectLabel.setFont(labelFont);
+        hpLabel.setFont(labelFont);
+        Font btnFont = attackButton.getFont().deriveFont(Font.PLAIN, 13f);
+        attackButton.setFont(btnFont);
+        stopButton.setFont(btnFont);
+        patrolButton.setFont(btnFont);
+
         add(attackButton);
         add(stopButton);
         add(patrolButton);
@@ -624,34 +649,26 @@ class GameMap {
     private void generateRiverWithBridges() {
         Random rand = new Random();
         boolean vertical = rand.nextBoolean();
-        java.util.List<Point> riverPoints = new ArrayList<>();
         int w = getWidth();
         int h = getHeight();
         if(vertical) {
-            int x = 2 + rand.nextInt(w - 4);
+            int x = 3 + rand.nextInt(w - 6);
             for(int y = 0; y < h; y++) {
                 tiles[y][x] = Tile.WATER;
-                riverPoints.add(new Point(x, y));
-                if(rand.nextDouble() < 0.4) {
-                    x += rand.nextBoolean() ? 1 : -1;
-                    x = Math.max(1, Math.min(w-2, x));
-                }
+            }
+            for(int i=0;i<2;i++) {
+                int by = 1 + rand.nextInt(h-2);
+                tiles[by][x] = Tile.BRIDGE;
             }
         } else {
-            int y = 2 + rand.nextInt(h - 4);
+            int y = 3 + rand.nextInt(h - 6);
             for(int x = 0; x < w; x++) {
                 tiles[y][x] = Tile.WATER;
-                riverPoints.add(new Point(x, y));
-                if(rand.nextDouble() < 0.4) {
-                    y += rand.nextBoolean() ? 1 : -1;
-                    y = Math.max(1, Math.min(h-2, y));
-                }
             }
-        }
-        int bridges = 1 + rand.nextInt(2);
-        for(int i = 0; i < bridges && !riverPoints.isEmpty(); i++) {
-            Point p = riverPoints.get(rand.nextInt(riverPoints.size()));
-            tiles[p.y][p.x] = Tile.BRIDGE;
+            for(int i=0;i<2;i++) {
+                int bx = 1 + rand.nextInt(w-2);
+                tiles[y][bx] = Tile.BRIDGE;
+            }
         }
     }
 
