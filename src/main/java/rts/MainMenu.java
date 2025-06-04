@@ -26,12 +26,14 @@ public class MainMenu extends JFrame {
 
         JButton startButton = new JButton("Start Game");
         JButton editorButton = new JButton("Map Editor");
+        JButton profileButton = new JButton("Profile");
         JButton settingsButton = new JButton("Settings");
         JButton exitButton = new JButton("Exit");
 
         Font btnFont = startButton.getFont().deriveFont(Font.PLAIN, 16f);
         startButton.setFont(btnFont);
         editorButton.setFont(btnFont);
+        profileButton.setFont(btnFont);
         settingsButton.setFont(btnFont);
         exitButton.setFont(btnFont);
 
@@ -50,12 +52,16 @@ public class MainMenu extends JFrame {
         gbc.gridy = 2;
         add(editorButton, gbc);
 
-        // Add Settings button
+        // Add Profile button
         gbc.gridy = 3;
+        add(profileButton, gbc);
+
+        // Add Settings button
+        gbc.gridy = 4;
         add(settingsButton, gbc);
 
         // Add Exit button
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         add(exitButton, gbc);
 
         // Action listener for "Start Game"
@@ -72,6 +78,14 @@ public class MainMenu extends JFrame {
             SwingUtilities.invokeLater(() -> {
                 MapEditor editor = new MapEditor();
                 editor.setVisible(true);
+            });
+        });
+
+        // Action listener for "Profile"
+        profileButton.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                ProfilePage profile = new ProfilePage();
+                profile.setVisible(true);
             });
         });
 
